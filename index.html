@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polisher v2.0 — Universal Rationale Reframer</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #0f172a;
+      --card-border: #1e293b;
+      --accent: #38bdf8;
+      --accent-dim: rgba(56, 189, 248, 0.12);
+      --accent-hover: #0ea5e9;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #020617;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      max-width: 1240px;
+      margin: 0 auto 20px auto;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: var(--accent);
+      color: #020617;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .status-cluster {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      background: var(--card-bg);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .status-dot.degraded {
+      background: var(--warning);
+      box-shadow: none;
+    }
+
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .controls-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .toggles-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-label {
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .segmented-switch {
+      display: flex;
+      background: var(--code-bg);
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+
+    .segmented-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .segmented-btn:hover:not(.active) {
+      color: var(--text);
+    }
+
+    .segmented-btn.active {
+      background: var(--accent);
+      color: #020617;
+      font-weight: 600;
+    }
+
+    .engine-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .engine-pill {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    @media (max-width: 860px) {
+      .editor-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pane {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 460px;
+    }
+
+    .pane-header {
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .pane-title {
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-indicator {
+      font-size: 10.5px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .pane-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    textarea {
+      width: 100%;
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.65;
+      padding: 16px;
+      resize: none;
+      outline: none;
+    }
+
+    textarea::placeholder {
+      color: #475569;
+    }
+
+    .output-container {
+      width: 100%;
+      flex: 1;
+      padding: 16px;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text);
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .output-placeholder {
+      color: #475569;
+      font-style: italic;
+    }
+
+    .metrics-bar {
+      padding: 9px 16px;
+      background: var(--code-bg);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .metric-item span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    .shortcut-hint {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .shortcut-hint kbd {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #020617;
+      border: none;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: #020617;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--success);
+      color: #020617;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge">ARKGON</div>
+      <h1>Universal Rationale Polisher <span style="font-size: 13px; color: var(--text-muted); font-weight: normal;">v2.0 • cadence normalization Engine</span></h1>
+    </div>
+    <div class="status-cluster">
+      <div class="status-badge">
+        <div id="statusDot" class="status-dot"></div>
+        <span id="statusText">Standalone Heuristic Engine Ready (Zero-statistical model)</span>
+      </div>
+      <div class="status-badge" id="tgBadge" title="Telegram Bot Token Isolation Status">
+        <span>TG: Env Isolated</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="controls-panel">
+      <div class="toggles-wrap">
+        <!-- Segmented Toggle 1: CEFR Level (C1 / C2) -->
+        <div class="control-group">
+          <span class="control-label">CEFR Target:</span>
+          <div class="segmented-switch" id="levelSwitch" role="group" aria-label="CEFR Level">
+            <button type="button" class="segmented-btn active" data-level="C1">C1 Advanced</button>
+            <button type="button" class="segmented-btn" data-level="C2">C2 Mastery</button>
+          </div>
+        </div>
+
+        <!-- Segmented Toggle 2: Style Mode (Default / Concise) -->
+        <div class="control-group">
+          <span class="control-label">Mode:</span>
+          <div class="segmented-switch" id="styleSwitch" role="group" aria-label="Rationale Style">
+            <button type="button" class="segmented-btn active" data-style="default">Default (Detailed)</button>
+            <button type="button" class="segmented-btn" data-style="concise">Concise (Punchy)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="engine-pills">
+        <span class="engine-pill">4–9w / 20–35w Burstiness</span>
+        <span class="engine-pill">Contractions On</span>
+        <span class="engine-pill">Cliché Stripper Active</span>
+      </div>
+    </div>
+
+    <div class="editor-grid">
+      <!-- Input Pane -->
+      <div class="pane">
+        <div class="pane-header">
+          <span class="pane-title">Raw Rationale / Draft Input</span>
+          <div class="pane-actions">
+            <button type="button" class="btn-ghost" id="pasteBtn">Paste</button>
+            <button type="button" class="btn-ghost" id="clearBtn">Clear</button>
+          </div>
+        </div>
+        <textarea id="inputText" placeholder="Paste or type raw SxS evaluation notes, model comparison reasoning, or technical prose here..."></textarea>
+        <div class="metrics-bar">
+          <div class="metric-item">Words: <span id="inWordCount">0</span></div>
+          <div class="metric-item">Chars: <span id="inCharCount">0</span></div>
+        </div>
+      </div>
+
+      <!-- Output Pane -->
+      <div class="pane">
+        <div class="pane-header">
+          <div class="pane-title">
+            <span>Polished Rationale</span>
+            <span class="mode-indicator" id="activeProfileBadge">C1 • DEFAULT</span>
+          </div>
+          <div class="pane-actions">
+            <button type="button" class="btn-ghost" id="copyBtn">Copy Result</button>
+          </div>
+        </div>
+        <div class="output-container" id="outputText">
+          <span class="output-placeholder">Polished rationale with high sentence-length burstiness and zero synthetic clichés will appear here...</span>
+        </div>
+        <div class="metrics-bar">
+          <div class="metric-item">Words: <span id="outWordCount">0</span></div>
+          <div class="metric-item">Sentences: <span id="outSentCount">0</span></div>
+          <div class="metric-item">Avg W/Sent: <span id="avgWpsMetric">--</span></div>
+          <div class="metric-item">Burstiness σ: <span id="burstinessSdMetric">--</span></div>
+          <div class="metric-item">Range: <span id="rangeMetric">--</span></div>
+          <div class="metric-item">Latency: <span id="latencyMetric">--</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="shortcut-hint">Shortcut: <kbd>⌘ Cmd</kbd> + <kbd>Enter</kbd> to Polish &middot; <kbd>⌘ Cmd</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> to Copy Output</div>
+      <button type="button" class="btn-primary" id="polishBtn">
+        <div class="spinner" id="btnSpinner"></div>
+        <span id="btnText">Polish Rationale</span>
+      </button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    let activeLevel = localStorage.getItem("polisher_level") || "C1";
+    let activeStyle = localStorage.getItem("polisher_style") || "default";
+
+    const inputText = document.getElementById("inputText");
+    const outputText = document.getElementById("outputText");
+    const polishBtn = document.getElementById("polishBtn");
+    const btnSpinner = document.getElementById("btnSpinner");
+    const btnText = document.getElementById("btnText");
+    const copyBtn = document.getElementById("copyBtn");
+    const pasteBtn = document.getElementById("pasteBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const toast = document.getElementById("toast");
+    const activeProfileBadge = document.getElementById("activeProfileBadge");
+
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const tgBadge = document.getElementById("tgBadge");
+
+    const inWordCount = document.getElementById("inWordCount");
+    const inCharCount = document.getElementById("inCharCount");
+    const outWordCount = document.getElementById("outWordCount");
+    const outSentCount = document.getElementById("outSentCount");
+    const avgWpsMetric = document.getElementById("avgWpsMetric");
+    const burstinessSdMetric = document.getElementById("burstinessSdMetric");
+    const rangeMetric = document.getElementById("rangeMetric");
+    const latencyMetric = document.getElementById("latencyMetric");
+
+    function syncToggleUI() {
+      document.querySelectorAll("#levelSwitch .segmented-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.level === activeLevel);
+      });
+      document.querySelectorAll("#styleSwitch .segmented-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.style === activeStyle);
+      });
+      activeProfileBadge.textContent = `${activeLevel} • ${activeStyle.toUpperCase()}`;
+    }
+    syncToggleUI();
+
+    // Level toggle (C1 / C2)
+    document.querySelectorAll("#levelSwitch .segmented-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeLevel = btn.dataset.level;
+        localStorage.setItem("polisher_level", activeLevel);
+        syncToggleUI();
+      });
+    });
+
+    // Style toggle (Default / Concise)
+    document.querySelectorAll("#styleSwitch .segmented-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeStyle = btn.dataset.style;
+        localStorage.setItem("polisher_style", activeStyle);
+        syncToggleUI();
+      });
+    });
+
+    // Input Word & Char counting
+    inputText.addEventListener("input", () => {
+      const val = inputText.value;
+      inCharCount.textContent = val.length;
+      inWordCount.textContent = val.trim() ? val.trim().split(/\s+/).length : 0;
+    });
+
+    // Clear
+    clearBtn.addEventListener("click", () => {
+      inputText.value = "";
+      inputText.dispatchEvent(new Event("input"));
+      inputText.focus();
+    });
+
+    // Paste
+    pasteBtn.addEventListener("click", async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        inputText.value = text;
+        inputText.dispatchEvent(new Event("input"));
+      } catch (e) {
+        inputText.focus();
+      }
+    });
+
+    // Copy helper
+    function copyPolishedOutput() {
+      const text = outputText.innerText;
+      if (!text || outputText.querySelector(".output-placeholder")) return;
+      navigator.clipboard.writeText(text).then(() => {
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2000);
+      });
+    }
+
+    copyBtn.addEventListener("click", copyPolishedOutput);
+
+    // 100% Standalone 5-Stage Heuristic Prose Reframer & Burstiness Engine (Works in file:// OR :8080 with Zero Local statistical model!)
+    function standalonePolishEngine(raw, level = "C1", style = "default") {
+      const t0 = performance.now();
+      let text = (raw || "").trim();
+      if (!text) return null;
+
+      const isC2 = level.toUpperCase() === "C2";
+      const isConcise = style.toLowerCase() === "concise";
+
+      // Stage 0: Whitespace & Typography Normalization
+      text = text
+        .replace(/[ \t]{2,}/g, " ")
+        .replace(/\s+([,.;:!?])/g, "$1")
+        .replace(/([,.;:!?])(?=[A-Za-z])/g, "$1 ")
+        .replace(/\s+--\s+/g, " — ");
+
+      if (/^[a-z]/.test(text)) {
+        text = text.charAt(0).toUpperCase() + text.slice(1);
+      }
+
+      // Stage 1: Exhaustive Cliché, Bureaucratic Padding & Phrasal-Verb Upgrader (130+ Rules)
+      const lexicalRules = [
+        [/\bdelve into\b/gi, isC2 ? "dissect" : "examine"],
+        [/\bdelves into\b/gi, isC2 ? "dissects" : "examines"],
+        [/\bdelving into\b/gi, isC2 ? "dissecting" : "examining"],
+        [/\ba testament to\b/gi, "proof of"],
+        [/\btestament to\b/gi, "proof of"],
+        [/\brobust\b/gi, isC2 ? "resilient" : "solid"],
+        [/\bseamlessly\b/gi, "smoothly"],
+        [/\bseamless\b/gi, "smooth"],
+        [/\bexhibits\b/gi, "shows"],
+        [/\bleveraging\b/gi, "using"],
+        [/\bleverage\b/gi, "use"],
+        [/\butilizing\b/gi, "using"],
+        [/\butilize\b/gi, "use"],
+        [/\bfacilitate\b/gi, "enable"],
+        [/\bfacilitates\b/gi, "enables"],
+        [/\bmultifaceted\b/gi, isC2 ? "multi-layered" : "complex"],
+        [/\bpivotal\b/gi, isC2 ? "decisive" : "key"],
+        [/\bcrucial\b/gi, isC2 ? "imperative" : "essential"],
+        [/\bvital\b/gi, "core"],
+        [/\btapestry of\b/gi, "mix of"],
+        [/\btapestry\b/gi, "mix"],
+        [/\bsymphony of\b/gi, "blend of"],
+        [/\bbeacon of\b/gi, "signal of"],
+        [/\bunderscores\b/gi, "highlights"],
+        [/\bunderscore\b/gi, "highlight"],
+        [/\bmeticulously\b/gi, "carefully"],
+        [/\bintricate\b/gi, "detailed"],
+        [/\brealm of\b/gi, "field of"],
+        [/\bparadigm shift\b/gi, "structural shift"],
+        [/\bsynergistic\b/gi, "combined"],
+        [/\bholistic\b/gi, "complete"],
+        [/\bactionable insights\b/gi, "concrete next steps"],
+        [/\bspearhead\b/gi, "lead"],
+        [/\bit is worth noting that\b/gi, "notably,"],
+        [/\bit is important to note that\b/gi, "notably,"],
+        [/\bit should be noted that\b/gi, "note that"],
+        [/\bin conclusion,\b/gi, "ultimately,"],
+        [/\bin summary,\b/gi, "in short,"],
+        [/\bat the end of the day,\b/gi, "ultimately,"],
+        [/\bin order to\b/gi, "to"],
+        [/\bdue to the fact that\b/gi, "because"],
+        [/\bowing to the fact that\b/gi, "because"],
+        [/\bin light of the fact that\b/gi, "since"],
+        [/\bfor the purpose of\b/gi, "for"],
+        [/\bin the event that\b/gi, "if"],
+        [/\bwith regard to\b/gi, "regarding"],
+        [/\bwith respect to\b/gi, "regarding"],
+        [/\bin terms of\b/gi, "for"],
+        [/\bas a result of\b/gi, "from"],
+        [/\bhas the ability to\b/gi, "can"],
+        [/\bhave the ability to\b/gi, "can"],
+        [/\bis able to\b/gi, "can"],
+        [/\bare able to\b/gi, "can"],
+        [/\bat this point in time\b/gi, "now"],
+        [/\bat the present time\b/gi, "currently"],
+        [/\bin the near future\b/gi, "soon"],
+        [/\bon a daily basis\b/gi, "daily"],
+        [/\bfor the most part\b/gi, "mostly"],
+        [/\ba lot of\b/gi, isC2 ? "substantial" : "many"],
+        [/\blots of\b/gi, isC2 ? "numerous" : "plenty of"],
+        [/\ba bunch of\b/gi, "several"],
+        [/\bkind of\b/gi, "somewhat"],
+        [/\bsort of\b/gi, "somewhat"],
+        [/\bvery good\b/gi, isC2 ? "exceptional" : "strong"],
+        [/\bvery bad\b/gi, isC2 ? "deficient" : "weak"],
+        [/\bvery important\b/gi, isC2 ? "imperative" : "critical"],
+        [/\bvery big\b/gi, isC2 ? "substantial" : "major"],
+        [/\bvery small\b/gi, isC2 ? "negligible" : "minor"],
+        [/\bvery fast\b/gi, isC2 ? "low-latency" : "rapid"],
+        [/\bvery slow\b/gi, isC2 ? "sluggish" : "slow"],
+        [/\breally good\b/gi, isC2 ? "compelling" : "solid"],
+        [/\breally bad\b/gi, isC2 ? "flawed" : "poor"],
+        [/\breally important\b/gi, isC2 ? "paramount" : "essential"],
+        [/\bmake sure\b/gi, "ensure"],
+        [/\bmakes sure\b/gi, "ensures"],
+        [/\bmade sure\b/gi, "ensured"],
+        [/\bfind out\b/gi, isC2 ? "ascertain" : "determine"],
+        [/\bfinds out\b/gi, isC2 ? "ascertains" : "determines"],
+        [/\blook into\b/gi, isC2 ? "investigate" : "examine"],
+        [/\blooks into\b/gi, isC2 ? "investigates" : "examines"],
+        [/\blook at\b/gi, isC2 ? "evaluate" : "review"],
+        [/\bset up\b/gi, isC2 ? "configure" : "establish"],
+        [/\bput together\b/gi, isC2 ? "synthesize" : "assemble"],
+        [/\btalk about\b/gi, isC2 ? "address" : "cover"],
+        [/\btalks about\b/gi, isC2 ? "addresses" : "covers"],
+        [/\bget rid of\b/gi, "eliminate"],
+        [/\bgets rid of\b/gi, "eliminates"],
+        [/\bkeep track of\b/gi, "monitor"],
+        [/\bkeeps track of\b/gi, "monitors"],
+        [/\bcome up with\b/gi, isC2 ? "formulate" : "develop"],
+        [/\bgo over\b/gi, "review"],
+        [/\bpoint out\b/gi, "highlight"],
+        [/\bpoints out\b/gi, "highlights"],
+        [/\bbring up\b/gi, "raise"],
+        [/\bcarry out\b/gi, "execute"],
+        [/\bfigure out\b/gi, isC2 ? "resolve" : "solve"],
+        [/\bwork on\b/gi, isC2 ? "refine" : "develop"],
+        [/\bworking on\b/gi, isC2 ? "refining" : "developing"],
+        [/\bdeal with\b/gi, isC2 ? "mitigate" : "handle"],
+        [/\bdealing with\b/gi, isC2 ? "mitigating" : "handling"],
+        [/\bspeed up\b/gi, "accelerate"],
+        [/\bslow down\b/gi, "throttle"],
+        [/\bneed to\b/gi, isC2 ? "must" : "should"],
+        [/\bneeds to\b/gi, isC2 ? "must" : "should"],
+        [/\bhave to\b/gi, "must"],
+        [/\bhas to\b/gi, "must"],
+        [/\btry to\b/gi, "aim to"]
+      ];
+
+      const registerShiftRules = isC2 ? [
+        [/\bexamine\b/gi, "dissect"],
+        [/\bexamines\b/gi, "dissects"],
+        [/\bsolid\b/gi, "resilient"],
+        [/\bcomplex\b/gi, "multi-layered"],
+        [/\bkey\b/gi, "decisive"],
+        [/\bimportant\b/gi, "consequential"],
+        [/\bhelpful\b/gi, "instrumental"],
+        [/\bclear\b/gi, "unambiguous"],
+        [/\bfast\b/gi, "low-latency"],
+        [/\brapid\b/gi, "low-latency"],
+        [/\bfix\b/gi, "remediate"],
+        [/\bfixes\b/gi, "remediates"],
+        [/\bshow\b/gi, "demonstrate"],
+        [/\bshows\b/gi, "demonstrates"],
+        [/\bcheck\b/gi, "verify"],
+        [/\bchecks\b/gi, "verifies"],
+        [/\bbuild\b/gi, "architect"],
+        [/\bchange\b/gi, "recalibrate"],
+        [/\bproblem\b/gi, "bottleneck"],
+        [/\bproblems\b/gi, "bottlenecks"],
+        [/\bissue\b/gi, "anomaly"],
+        [/\bissues\b/gi, "anomalies"],
+        [/\bpart\b/gi, "component"],
+        [/\bparts\b/gi, "components"],
+        [/\bgood\b/gi, "sound"],
+        [/\bbad\b/gi, "suboptimal"],
+        [/\bbig\b/gi, "substantial"],
+        [/\bsmall\b/gi, "granular"],
+        [/\buse\b/gi, "deploy"],
+        [/\buses\b/gi, "deploys"],
+        [/\busing\b/gi, "deploying"]
+      ] : [
+        [/\bdissect\b/gi, "examine"],
+        [/\bdissects\b/gi, "examines"],
+        [/\bresilient\b/gi, "solid"],
+        [/\bmulti-layered\b/gi, "complex"],
+        [/\bdecisive\b/gi, "key"],
+        [/\bconsequential\b/gi, "important"],
+        [/\binstrumental\b/gi, "helpful"],
+        [/\bunambiguous\b/gi, "clear"],
+        [/\blow-latency\b/gi, "fast"],
+        [/\bremediate\b/gi, "fix"],
+        [/\bdemonstrate\b/gi, "show"],
+        [/\bdemonstrates\b/gi, "shows"],
+        [/\bascertain\b/gi, "determine"],
+        [/\bverify\b/gi, "check"],
+        [/\barchitect\b/gi, "build"],
+        [/\brecalibrate\b/gi, "change"],
+        [/\bbottleneck\b/gi, "problem"],
+        [/\bbottlenecks\b/gi, "problems"],
+        [/\banomaly\b/gi, "issue"],
+        [/\banomalies\b/gi, "issues"],
+        [/\bcomponent\b/gi, "part"],
+        [/\bcomponents\b/gi, "parts"],
+        [/\bdeploy\b/gi, "use"],
+        [/\bdeploys\b/gi, "uses"],
+        [/\bdeploying\b/gi, "using"]
+      ];
+
+      for (const [pattern, repl] of [...lexicalRules, ...registerShiftRules]) {
+        text = text.replace(pattern, (match) => {
+          const isCap = match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase();
+          return isCap ? repl.charAt(0).toUpperCase() + repl.slice(1) : repl;
+        });
+      }
+
+      // Stage 2: Mandatory Spoken Contractions
+      const contractionRules = [
+        [/\bdo not\b/gi, "don't"],
+        [/\bdoes not\b/gi, "doesn't"],
+        [/\bdid not\b/gi, "didn't"],
+        [/\bcannot\b/gi, "can't"],
+        [/\bcan not\b/gi, "can't"],
+        [/\bwill not\b/gi, "won't"],
+        [/\bwould not\b/gi, "wouldn't"],
+        [/\bshould not\b/gi, "shouldn't"],
+        [/\bcould not\b/gi, "couldn't"],
+        [/\bit is\b/gi, "it's"],
+        [/\bthat is\b/gi, "that's"],
+        [/\bthere is\b/gi, "there's"],
+        [/\bwhat is\b/gi, "what's"],
+        [/\bwe are\b/gi, "we're"],
+        [/\bthey are\b/gi, "they're"],
+        [/\byou are\b/gi, "you're"],
+        [/\bI am\b/g, "I'm"],
+        [/\bi am\b/g, "I'm"],
+        [/\bi'm\b/g, "I'm"],
+        [/\bI have\b/g, "I've"],
+        [/\bwe have\b/gi, "we've"],
+        [/\bthey have\b/gi, "they've"],
+        [/\bis not\b/gi, "isn't"],
+        [/\bare not\b/gi, "aren't"],
+        [/\bwas not\b/gi, "wasn't"],
+        [/\bwere not\b/gi, "weren't"],
+        [/\bhas not\b/gi, "hasn't"],
+        [/\bhave not\b/gi, "haven't"]
+      ];
+
+      for (const [pattern, repl] of contractionRules) {
+        text = text.replace(pattern, (match) => {
+          const isCap = match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase();
+          return isCap ? repl.charAt(0).toUpperCase() + repl.slice(1) : repl;
+        });
+      }
+
+      // Stage 3: Tri-Modal Sentence Cadence & Burstiness Restructuring
+      const parts = text.split(/(?<=[.!?])\s+/);
+      const reshaped = parts.map((sent, idx) => {
+        let s = sent.trim();
+        if (!s) return s;
+
+        if (/^(Furthermore|Moreover|Additionally|Consequently|Subsequently),?\s+/i.test(s)) {
+          const pivotPool = isC2 ? ["Even so, ", "Beyond that, ", "Still, "] : ["Plus, ", "Still, ", "Look — "];
+          s = s.replace(/^(Furthermore|Moreover|Additionally|Consequently|Subsequently),?\s+/i, pivotPool[idx % pivotPool.length]);
+        }
+
+        if (isConcise) {
+          const conciseTrim = s
+            .replace(/^(Basically|Essentially|Generally speaking|As a matter of fact|Plus|Still|Even so|Beyond that|Notably|In practice|Specifically),?\s+/i, "")
+            .replace(/^Look\s*—\s*/i, "")
+            .replace(/\b(just|really|actually|literally|quite|simply|basically|very|extremely|highly)\s+/gi, "");
+          if (conciseTrim.length > 0) {
+            s = conciseTrim.charAt(0).toUpperCase() + conciseTrim.slice(1);
+          }
+        }
+
+        const words = s.split(/\s+/);
+        if (words.length >= 11) {
+          let splitMatch = s.match(/^(.{12,140}?),\s+(and|but|so|yet|which|because|while)\s+(.{10,})$/i);
+          if (!splitMatch) {
+            splitMatch = s.match(/^([^,]{12,140}?)\s+(and|but|so|yet|which|because|while)\s+(.{10,})$/i);
+          }
+          if (splitMatch) {
+            const firstClause = splitMatch[1].trim().replace(/[.!?]+$/, "");
+            const conj = splitMatch[2].toLowerCase();
+            const secondClause = splitMatch[3].trim();
+            const cleanSecond = secondClause.charAt(0).toLowerCase() + secondClause.slice(1);
+            const capSecond = secondClause.charAt(0).toUpperCase() + secondClause.slice(1);
+
+            if (isConcise) {
+              s = `${firstClause}. ${capSecond}`;
+            } else if (conj === "but" || conj === "yet" || conj === "while") {
+              s = `${firstClause}. Still, ${cleanSecond}`;
+            } else if (conj === "so") {
+              s = `${firstClause}. That's why ${cleanSecond}`;
+            } else if (conj === "which") {
+              s = `${firstClause}. This directly ${cleanSecond}`;
+            } else if (conj === "because") {
+              s = `${firstClause}. The reason: ${cleanSecond}`;
+            } else {
+              s = `${firstClause}. ${capSecond}`;
+            }
+          }
+        }
+
+        if (s.split(/\s+/).length >= 5 && !/[.!?:;]$/.test(s)) {
+          s = s + ".";
+        }
+        return s;
+      });
+
+      const finalResult = reshaped.join(" ").replace(/[ \t]{2,}/g, " ").trim();
+      const sents = finalResult.split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(Boolean);
+      const lengths = sents.map(x => x.split(/\s+/).filter(Boolean).length);
+      const n = lengths.length || 1;
+      const avg = lengths.reduce((a, b) => a + b, 0) / n;
+      const sd = n > 1 ? Math.sqrt(lengths.reduce((sum, w) => sum + Math.pow(w - avg, 2), 0) / n) : 0;
+
+      return {
+        success: true,
+        result: finalResult,
+        sentence_count: sents.length,
+        avg_sentence_words: avg.toFixed(1),
+        burstiness_sd: sd.toFixed(1),
+        sentence_range: lengths.length ? `${Math.min(...lengths)}–${Math.max(...lengths)}w` : "0–0w",
+        latency_ms: Math.max(1, Math.round(performance.now() - t0))
+      };
+    }
+
+    async function checkHealth() {
+      statusDot.className = "status-dot";
+      statusText.textContent = "Standalone Engine Active (Zero-statistical model)";
+      tgBadge.innerHTML = '<span>100% Client/Offline Ready</span>';
+    }
+    checkHealth();
+
+    async function doPolish() {
+      const text = inputText.value.trim();
+      if (!text || polishBtn.disabled) return;
+
+      polishBtn.disabled = true;
+      btnSpinner.style.display = "block";
+      btnText.textContent = "Polishing...";
+
+      try {
+        // Run instantaneous standalone client engine immediately (works even on file:// with zero servers running!)
+        const data = standalonePolishEngine(text, activeLevel, activeStyle);
+        if (data && data.success) {
+          outputText.textContent = data.result;
+          outWordCount.textContent = data.result.trim() ? data.result.trim().split(/\s+/).length : 0;
+          outSentCount.textContent = data.sentence_count || 0;
+          avgWpsMetric.textContent = (data.avg_sentence_words || "--") + "w";
+          burstinessSdMetric.textContent = (data.burstiness_sd !== undefined ? data.burstiness_sd + "w" : "--");
+          rangeMetric.textContent = data.sentence_range || "--";
+          latencyMetric.textContent = data.latency_ms + "ms";
+        }
+      } finally {
+        polishBtn.disabled = false;
+        btnSpinner.style.display = "none";
+        btnText.textContent = "Polish Rationale";
+      }
+    }
+
+    polishBtn.addEventListener("click", doPolish);
+
+    // Also auto-polish when switching C1/C2 or Default/Concise if text is present!
+    document.querySelectorAll("#levelSwitch .segmented-btn, #styleSwitch .segmented-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (inputText.value.trim()) doPolish();
+      });
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        doPolish();
+      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "C" || e.key === "c")) {
+        e.preventDefault();
+        copyPolishedOutput();
+      }
+    });
+
+  </script>
+</body>
+</html>
